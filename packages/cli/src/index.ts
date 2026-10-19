@@ -353,7 +353,7 @@ program
     const l = await cfg();
     const ok = (b: boolean, s: string) => console.log(`${b ? '✅' : '⚠️ '} ${s}`);
     ok(!!l.file, `config: ${l.file ? rel(l, l.file) : 'none (using defaults)'}`);
-    ok(process.versions.node.split('.')[0]! >= '20', `node ${process.version}`);
+    ok(Number(process.versions.node.split('.')[0]) >= 20, `node ${process.version}`);
     const health = l.config.webServer?.url ?? l.config.baseURL;
     ok(await isUp(health), `app reachable at ${health}${l.config.webServer ? ' (webServer will start it if not)' : ''}`);
     const { resolved } = allScenarios(l);
