@@ -1,0 +1,16 @@
+{
+  "name": "receipts",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "receipts": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@receipts/action": "workspace:*",
+    "@receipts/core": "workspace:*",
+    "@receipts/viewer": "workspace:*",
+    "commander": "^15.0.0"
+  }
+}

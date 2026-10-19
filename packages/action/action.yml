@@ -1,0 +1,69 @@
+name: Receipts evidence
+description: Run Receipts scenarios for a PR, publish private evidence, and post one sticky comment plus a receipts/evidence check.
+branding: { icon: check-square, color: blue }
+inputs:
+  working-directory:
+    description: Directory containing receipts.config.ts
+    default: .
+  scenarios:
+    description: Space-separated scenario keys/globs/@tags. Default = changed + Test Plan-mapped + @smoke.
+    default: ''
+  all:
+    description: Run every scenario
+    default: 'false'
+  base-url:
+    description: Target a preview environment instead of starting the app (webServer).
+    default: ''
+  dry-run:
+    description: Write the comment/check to files and skip all GitHub API calls.
+    default: 'false'
+  comment-file:
+    description: Where to write the rendered comment markdown.
+    default: ''
+  annotate-pr-body:
+    description: Append evidence links to Test Plan checkboxes in the PR body (off by default).
+    default: 'false'
+  github-token:
+    description: Token with pull-requests:write and checks:write.
+    default: ${{ github.token }}
+  upload-artifact:
+    description: Also upload the bundle as a GitHub Actions artifact (zero-infra fallback, private to repo members).
+    default: 'true'
+  retention-days:
+    default: '30'
+outputs:
+  conclusion:
+    value: ${{ steps.receipts.outputs.conclusion }}
+  run-dir:
+    value: ${{ steps.receipts.outputs.run-dir }}
+  comment-file:
+    value: ${{ steps.receipts.outputs.comment-file }}
+runs:
+  using: composite
+  steps:
+    - name: Install Playwright Chromium
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npx playwright install --with-deps chromium
+    - name: Run Receipts
+      id: receipts
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        RECEIPTS_GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        args=(ci --event "$GITHUB_EVENT_PATH")
+        [ -n "${{ inputs.scenarios }}" ] && args+=(--scenarios ${{ inputs.scenarios }})
+        [ "${{ inputs.all }}" = "true" ] && args+=(--all)
+        [ -n "${{ inputs.base-url }}" ] && args+=(--base-url "${{ inputs.base-url }}")
+        [ "${{ inputs.dry-run }}" = "true" ] && args+=(--dry-run)
+        [ -n "${{ inputs.comment-file }}" ] && args+=(--comment-out "${{ inputs.comment-file }}")
+        [ "${{ inputs.annotate-pr-body }}" = "true" ] && args+=(--annotate-pr-body)
+        npx receipts "${args[@]}"
+    - name: Upload evidence bundle
+      if: always() && inputs.upload-artifact == 'true' && steps.receipts.outputs.run-dir != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: receipts-${{ github.run_id }}
+        path: ${{ steps.receipts.outputs.run-dir }}
+        retention-days: ${{ inputs.retention-days }}
