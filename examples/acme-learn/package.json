@@ -6,7 +6,8 @@
   "scripts": {
     "media": "sh scripts/make-media.sh",
     "start": "node server.js",
-    "receipts": "receipts"
+    "receipts": "receipts",
+    "ci:dry-run": "node scripts/fake-pr-event.mjs && receipts ci --event .receipts/ci/event.json --dry-run --no-publish --annotate-pr-body --link-base http://127.0.0.1:4400 --comment-out .receipts/ci/pr-comment.md --check-out .receipts/ci/check-run.json"
   },
   "dependencies": {
     "express": "^4.22.3"
