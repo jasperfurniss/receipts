@@ -1,0 +1,19 @@
+{
+  "name": "@receipts/viewer",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "receipts-viewer": "dist/bin.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@receipts/core": "workspace:*",
+    "@types/pngjs": "^6.0.5"
+  }
+}
