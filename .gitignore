@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+**/.receipts/runs/
+**/.receipts/personas/
+**/.receipts/store/
+**/.receipts/ci/
+**/.receipts/audit.log
+test-results/
+playwright-report/
