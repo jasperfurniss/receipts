@@ -1,0 +1,76 @@
+id: video-resume
+title: Lesson video resumes from saved progress
+description: Signed-in learners pick up where they left off when resume-playback is on.
+tags: [smoke, video, progress]
+covers:                       # Test Plan checkbox text (fuzzy-matched)
+  - "Signed-in learner: watch ~40s, leave, return"
+  - "No console errors on the lesson page"
+persona: learner
+flags:
+  resume-playback: on
+viewport: { width: 1280, height: 720 }
+fixtures:
+  lesson: intro-to-typography
+setup:
+  - id: reset
+    api: { method: DELETE, url: "/api/me/progress/lessons/{{lesson}}" }   # clean slate
+
+steps:
+  - id: open
+    chapter: Open lesson as signed-in learner
+    goto: /lessons/{{lesson}}
+    expect:
+      - visible: { role: region, name: Lesson video }
+      - media: { lte: 1 }
+    capture: opened
+
+  - id: watch
+    chapter: Watch ~40 seconds
+    media: { muted: true, seek: 40, play: true, waitForTime: 42 }
+    capture: playing-at-40s
+    expect:
+      - request: { method: PUT, url: "/api/me/progress/**", times: ">=1" }
+
+  - id: leave
+    chapter: Leave the lesson
+    goto: /courses
+    capture: left-lesson
+
+  - id: return
+    chapter: Return to the lesson
+    goto: /lessons/{{lesson}}
+    wait: { selector: video, state: attached }
+    expect:
+      - media: { time: 42, tolerance: 3 }
+      - visible: { text: "/Resuming from 0:4\\d/" }
+      - judge: "The player shows a 'Resuming from' indicator near 0:42 and is not at 0:00"
+    capture: resumed
+
+  - id: health
+    chapter: Health
+    expect:
+      - console: { errors: 0 }
+
+variants:
+  - id: flag-off
+    covers: ["Flag off → video starts at 0:00"]
+    flags: { resume-playback: off }
+    override_last_expect:
+      - media: { lte: 1 }
+      - hidden: { text: "/Resuming from/" }
+
+  - id: signed-out
+    covers: ["Signed out → video starts at 0:00, no progress API calls"]
+    persona: anonymous
+    skip_steps: [reset]
+    override_steps:
+      open:
+        chapter: Open lesson while signed out
+      watch:
+        expect: []
+    override_last_expect:
+      - media: { lte: 1 }
+      - request: { url: "/api/me/progress/**", times: 0 }
+
+redact:
+  - ".avatar"

@@ -1,0 +1,8 @@
+{
+  "ebab83ac5e199cf7": {
+    "instruction": "Scroll the profile card into view",
+    "code": "await page.locator('.profile').scrollIntoViewIfNeeded();",
+    "source": "manual",
+    "createdAt": "2026-10-19T23:18:54.272Z"
+  }
+}

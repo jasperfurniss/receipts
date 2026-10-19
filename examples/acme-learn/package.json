@@ -1,0 +1,19 @@
+{
+  "name": "acme-learn",
+  "private": true,
+  "type": "module",
+  "description": "Fictional demo app for Receipts: a lesson video that resumes from saved progress behind the resume-playback flag.",
+  "scripts": {
+    "media": "sh scripts/make-media.sh",
+    "start": "node server.js",
+    "receipts": "receipts"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@receipts/core": "workspace:*",
+    "receipts": "workspace:*"
+  }
+}

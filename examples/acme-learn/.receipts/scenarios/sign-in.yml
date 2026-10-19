@@ -1,0 +1,34 @@
+id: sign-in
+title: Learner can sign in and sees their account menu
+tags: [auth]
+covers:
+  - "Sign in with email and password lands on Courses"
+persona: anonymous
+fixtures:
+  email: ada@acme.test
+  password: correct-horse   # synthetic test persona, not a real credential
+steps:
+  - chapter: Open the sign-in page
+    goto: /signin
+    expect:
+      - visible: { role: heading, name: Sign in }
+
+  - chapter: Enter credentials
+    fill: { target: { label: Email }, value: "{{email}}" }
+  - fill: { target: { label: Password }, value: "{{password}}" }
+    capture: credentials-entered
+
+  - chapter: Submit
+    click: { role: button, name: Sign in }
+    wait: { url: "**/courses" }
+    expect:
+      - url: "**/courses"
+      - visible: { testId: account-menu }
+    capture: signed-in
+
+  - chapter: Profile details are redacted
+    do: "Scroll the profile card into view"
+    expect:
+      - visible: { text: Your profile }
+      - console: { errors: 0 }
+    capture: profile
