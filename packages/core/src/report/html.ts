@@ -124,7 +124,7 @@ export function renderRunPage(summary: RunSummary, manifests: Manifest[], o: Ren
 <title>Receipts · ${esc(summary.runId)}</title><style>${STYLES}</style>${o.extraHead ?? ''}</head><body>
 <header class="top"><span class="brand">🧾 Receipts</span>${o.nav ?? ''}<span class="meta" style="color:#94a3b8">run <code>${esc(summary.runId)}</code></span></header>
 <main>
-<div class="card"><h1 style="margin:0 0 6px;font-size:20px">${summary.totals.failed ? '❌' : '✅'} ${summary.totals.passed}/${summary.scenarios.length} scenarios passed</h1>
+<div class="card"><h1 style="margin:0 0 6px;font-size:20px">${summary.totals.failed ? '❌' : '✅'} ${summary.totals.passed}/${summary.scenarios.length} scenarios passed${summary.totals.skipped ? ` · ${summary.totals.skipped} skipped` : ''}</h1>${(summary.skipped ?? []).map((k) => `<p class="muted">⏭ ${esc(k.key)}: ${esc(k.reason)}</p>`).join('')}
 <p class="meta"><code>${esc(summary.git.shortSha)}</code> on <code>${esc(summary.git.branch ?? '?')}</code>${summary.git.dirty ? ' (uncommitted changes)' : ''} · ${esc(summary.browser)} · ${esc(summary.baseURL)} · ${(summary.durationMs / 1000).toFixed(1)}s · ${esc(new Date(summary.createdAt).toLocaleString())}${summary.pr ? ` · PR #${summary.pr.number}` : ''}${o.compareLink ?? ''}</p>
 <table><tr><th></th><th>Scenario</th><th>Title</th><th>Persona</th><th>Flags</th><th>Time</th></tr>${rows}</table></div>
 ${summary.scenarios.map((s) => {

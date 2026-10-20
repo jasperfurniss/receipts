@@ -8,3 +8,17 @@ dist/
 **/.receipts/audit.log
 test-results/
 playwright-report/
+worktrees/
+
+# Local/work-specific — never commit
+targets/
+worktrees/
+auth.json
+**/auth.json
+.env
+.env.*
+!.env.example
+node_modules/
+*.mp4
+*.webm
+*.mov

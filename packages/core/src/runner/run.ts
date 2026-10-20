@@ -1,6 +1,6 @@
 import { mkdir, rename, rm, writeFile, copyFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import os from 'node:os';
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import type { LoadedConfig } from '../config.js';
@@ -539,9 +539,16 @@ export async function runScenarios(loaded: LoadedConfig, scenarios: ResolvedScen
   const started = Date.now();
   const results: ScenarioRunResult[] = [];
   const personaFiles = new Map<string, string | undefined>();
+  const skipped: { key: string; title: string; reason: string }[] = [];
   try {
     for (const s of scenarios) {
       log(`● ${s.key} — ${s.title}`);
+      const missing = missingPersonaState(loaded, s.persona);
+      if (missing) {
+        skipped.push({ key: s.key, title: s.title, reason: missing });
+        log(`  ⏭  skipped: ${missing}`);
+        continue;
+      }
       try {
         const r = await runOne(browser, loaded, s, runDir, runId, git, { ...opts, baseURL, headless, personaFiles, log });
         results.push(r);
@@ -578,10 +585,19 @@ export async function runScenarios(loaded: LoadedConfig, scenarios: ResolvedScen
       screenshots: m.artifacts.filter((a) => a.kind === 'screenshot').length,
       highlights: m.steps.flatMap((s) => s.assertions.filter((a) => a.kind === 'media' || a.kind === 'request' || a.kind === 'console').map((a) => `${a.description} → ${a.actual ?? a.status}`)).slice(0, 4),
     })),
-    totals: { passed: results.filter((r) => r.manifest.status === 'passed').length, failed: results.filter((r) => r.manifest.status !== 'passed').length },
+    skipped,
+    totals: { passed: results.filter((r) => r.manifest.status === 'passed').length, failed: results.filter((r) => r.manifest.status !== 'passed').length, skipped: skipped.length },
   };
   await writeFile(join(runDir, 'run.json'), JSON.stringify(summary, null, 2));
   // Convenience pointer for `receipts open` with no args.
   await writeFile(join(loaded.runsDir, 'latest'), runId + '\n');
   return { summary, runDir, results };
+}
+
+/** Reason string when a persona's storageState file is missing and the persona opts into skipping. */
+export function missingPersonaState(loaded: LoadedConfig, persona: string): string | undefined {
+  const p = loaded.config.personas?.[persona];
+  if (!p?.storageState || (p.ifMissing ?? 'skip') !== 'skip') return undefined;
+  const file = resolve(loaded.root, p.storageState);
+  return existsSync(file) ? undefined : `persona "${persona}" storageState not found at ${file}`;
 }

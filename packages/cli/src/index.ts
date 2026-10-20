@@ -131,7 +131,7 @@ program
     const { summary, runDir } = await runScenarios(l, sel, { headed: o.headed, baseURL: o.baseUrl, runId: o.runId, freshPersonas: o.freshPersonas });
     const report = writeLocalReport(runDir);
     if (o.json) console.log(JSON.stringify(summary, null, 2));
-    console.error(`\n${summary.totals.failed ? '❌' : '✅'} ${summary.totals.passed}/${summary.scenarios.length} passed · report: ${rel(l, report)}`);
+    console.error(`\n${summary.totals.failed ? '❌' : '✅'} ${summary.totals.passed}/${summary.scenarios.length} passed${summary.totals.skipped ? ` · ${summary.totals.skipped} skipped` : ''} · report: ${rel(l, report)}`);
     process.exitCode = summary.totals.failed ? 1 : 0;
   });
 

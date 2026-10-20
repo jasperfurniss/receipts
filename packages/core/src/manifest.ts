@@ -188,7 +188,9 @@ export interface RunSummary {
   browser: string;
   durationMs: number;
   scenarios: RunSummaryEntry[];
-  totals: { passed: number; failed: number };
+  /** Scenarios not run (e.g. persona storageState missing). */
+  skipped?: { key: string; title: string; reason: string }[];
+  totals: { passed: number; failed: number; skipped?: number };
   /** Optional PR context, set by `publish`/`ci`. */
   pr?: { number: number; repo?: string; headSha?: string };
 }

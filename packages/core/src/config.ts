@@ -44,6 +44,8 @@ export interface PersonaConfig {
   label?: string;
   /** Path to an existing Playwright storageState JSON. */
   storageState?: string;
+  /** When `storageState` points at a file that doesn't exist: skip scenarios using this persona (default) or error. */
+  ifMissing?: 'skip' | 'error';
   /** API sign-in (no UI login in the video), or a function for anything custom. */
   signIn?:
     | { request: { method?: string; url: string; data?: unknown; headers?: Record<string, string> } }
