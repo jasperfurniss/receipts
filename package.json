@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc -b packages/core packages/viewer packages/action packages/cli",
     "test": "vitest run",
-    "demo": "pnpm -C examples/acme-learn receipts run --all"
+    "browsers": "pnpm -C packages/core exec playwright install chromium",
+    "demo": "pnpm -C examples/acme-learn exec receipts run --all"
   },
   "engines": {
     "node": ">=20"

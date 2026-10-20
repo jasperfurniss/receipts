@@ -95,7 +95,7 @@ program
     const cur = existsSync(gi) ? readFileSync(gi, 'utf8') : '';
     const add = lines.filter((x) => !cur.includes(x));
     if (add.length) appendFileSync(gi, `${cur.endsWith('\n') || !cur ? '' : '\n'}# receipts\n${add.join('\n')}\n`);
-    console.log('\nNext: edit receipts.config.ts, then `npx receipts run --all` and `npx receipts open`.');
+    console.log("\nNext: edit receipts.config.ts, then `receipts doctor`, `receipts run --all` and `receipts open`.");
   });
 
 program
@@ -366,7 +366,11 @@ program
       ok(true, `chromium ${b.version()}`);
       for (const name of Object.keys(l.config.personas ?? {})) {
         try {
-          if (await isUp(health)) {
+          const p = l.config.personas![name]!;
+          if (p.storageState) {
+            const f = resolve(l.root, p.storageState);
+            ok(existsSync(f), existsSync(f) ? `persona "${name}" storageState ${rel(l, f)}` : `persona "${name}": storageState ${rel(l, f)} not found (${(p.ifMissing ?? 'skip') === 'skip' ? 'its scenarios will be skipped' : 'runs will fail'}; capture it with playwright codegen --save-storage)`);
+          } else if (await isUp(health)) {
             await ensurePersonaState(b, l, name, l.config.baseURL, true);
             ok(true, `persona "${name}" signs in`);
           }
@@ -376,7 +380,7 @@ program
       }
       await b.close();
     } catch (e) {
-      ok(false, `chromium: ${(e as Error).message.split('\n')[0]} (run: npx playwright install chromium)`);
+      ok(false, `chromium: ${(e as Error).message.split('\n')[0]} (from the receipts repo: pnpm browsers)`);
     }
     ok(!!l.config.flags?.adapters.length, `flag adapters: ${(l.config.flags?.adapters ?? []).map((a) => a.type).join(', ') || 'none'}`);
     ok(!!l.config.redact?.selectors?.length, `redaction selectors: ${(l.config.redact?.selectors ?? []).join(', ') || 'none (only [data-receipts-redact])'}`);
